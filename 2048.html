@@ -1,0 +1,117 @@
+
+<html>
+
+<head>
+	<meta charset="utf-8">
+	<title>2048小游戏</title>
+	<link  href="2048.css"  media="all" rel="stylesheet" />
+</head>
+
+
+<body>
+	<h3 id="score">分数：0</h3>
+	<div class="g2048">
+		<div class="cell"></div>
+		<div class="cell"></div>
+		<div class="cell"></div>
+		<div class="cell"></div>
+		<div class="cell"></div>
+		<div class="cell"></div>
+		<div class="cell"></div>
+		<div class="cell"></div>
+		<div class="cell"></div>
+		<div class="cell"></div>
+		<div class="cell"></div>
+		<div class="cell"></div>
+		<div class="cell"></div>
+		<div class="cell"></div>
+		<div class="cell"></div>
+		<div class="cell"></div>
+	</div>
+	<div class="pk">
+		<button class="btn" id=post>PK</button>
+	</div>
+	<div class="list" id="list">
+		
+	</div>
+
+	<script type="text/javascript" src="./dist/nebulas.js"></script>
+    <script type="text/javascript" src="./dist/nebPay.js"></script>
+	<script src="http://apps.bdimg.com/libs/jquery/1.8.1/jquery.min.js"></script>
+	<script src="2048.js"></script>
+	
+	<script>
+    "use strict";
+    var dappContactAddress = "n1rtztPEACT69Uo8Jpvdz3pKRXEuZgR3dKj";
+    var nebulas = require("nebulas"), Account = Account, neb = new nebulas.Neb();
+    neb.setRequest(new nebulas.HttpRequest("https://testnet.nebulas.io"))
+
+
+    var NebPay = require("nebpay");     //https://github.com/nebulasio/nebPay
+    var nebPay = new NebPay();
+    var serialNumber
+
+	//查询函数
+	function rf(){ 
+        var from = dappContactAddress
+        var value = "0";
+        var nonce = "0"
+        var gas_price = "1000000"
+        var gas_limit = "2000000"
+        var callFunction = "get";
+        var callArgs = "";
+        console.log(callArgs);
+        var contract = {
+            "function": callFunction,
+            "args": callArgs
+        }
+        neb.api.call(from, dappContactAddress, value, nonce, gas_price, gas_limit, contract).then(function (resp) {
+            var result = resp.result;
+            
+            if (result === 'null') {
+                return;
+            }
+			var r = JSON.parse(result);
+			s2 = r.value;
+			document.getElementById("list").innerHTML = "<div class=\"lista\">全网最高分</br>"+r.value+"</div>"+"<div class=\"listb\">"+r.name+"</div>";
+		});
+    }
+	
+	//上传数据函数
+	function rs(){
+		var to = dappContactAddress;
+			var value = "0";
+			var callFunction = "set";
+			var callArgs = "[" + s + "]";
+			serialNumber = nebPay.call(to, value, callFunction, callArgs, {    //使用nebpay的call接口去调用合约,
+				listener: function (resp) {
+					console.log("thecallback is " + resp)
+				}
+			});
+	}
+	
+    $(document).ready(function(){
+		rf();
+	})
+	
+	$('#post').click(function () {
+		rf();
+		if(s >= s2)
+		{
+			rs();
+		}else{
+			var r=confirm("您的分数太低，不能进行pk，请再接再厉！");
+			if (r==true)
+			  {
+					location.reload();
+			  }
+			else
+			  {
+					return;
+			  }
+		}
+    })
+
+</script>
+</body>
+</html>
